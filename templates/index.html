@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lung Disease X-ray Classification</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+        h2 { color: #333; text-align: center; margin-bottom: 30px; font-size: 26px; }
+        form { text-align: center; margin-bottom: 30px; }
+        input[type="file"] { display: none; }
+        .file-label {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: background 0.3s;
+        }
+        .file-label:hover { background: #5568d3; }
+        input[type="submit"] {
+            padding: 12px 40px;
+            background: #764ba2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        input[type="submit"]:hover { background: #5f3a82; }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h3 { color: #333; margin-bottom: 15px; font-size: 22px; text-align: center; }
+        h4 { color: #555; margin-bottom: 10px; font-size: 18px; }
+        ul { list-style: none; padding: 0; }
+        li {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            border-left: 4px solid #667eea;
+        }
+        li:nth-child(2) { border-left-color: #764ba2; }
+        img {
+            display: block;
+            margin: 20px auto 0;
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            border: 1px solid #f5c6cb;
+        }
+        .prediction-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .prediction-badge.normal { background: #d4edda; color: #155724; }
+        .prediction-badge.pneumonia { background: #f8d7da; color: #721c24; }
+        #file-name { margin-top: 10px; color: #666; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🩺 Lung Disease X-ray Classification</h2>
+        <form action="/predict" method="post" enctype="multipart/form-data">
+            <label for="file-input" class="file-label">📁 Choose X-ray Image</label>
+            <input type="file" id="file-input" name="file" accept="image/*" required onchange="showFileName()">
+            <div id="file-name"></div>
+            <br><br>
+            <input type="submit" value="🔍 Predict">
+        </form>
+        {% if error %}
+            <div class="error"><strong>⚠️ Error:</strong> {{ error }}</div>
+        {% endif %}
+        {% if prediction %}
+            <div class="result">
+                <h3>Prediction Result</h3>
+                <div style="text-align: center;">
+                    <span class="prediction-badge {{ prediction.lower() }}">
+                        {% if prediction == 'NORMAL' %}✅ {{ prediction }}{% else %}⚠️ {{ prediction }}{% endif %}
+                    </span>
+                </div>
+                <h4>Confidence Scores:</h4>
+                <ul>
+                    <li><span>NORMAL:</span><span><strong>{{ '%.2f'|format(probabilities[0]*100) }}%</strong></span></li>
+                    <li><span>PNEUMONIA:</span><span><strong>{{ '%.2f'|format(probabilities[1]*100) }}%</strong></span></li>
+                </ul>
+                <img src="data:image/png;base64,{{ img_data }}" alt="Uploaded X-ray">
+            </div>
+        {% endif %}
+    </div>
+    <script>
+        function showFileName() {
+            const input = document.getElementById('file-input');
+            const fileNameDiv = document.getElementById('file-name');
+            if (input.files.length > 0) {
+                fileNameDiv.textContent = '📄 ' + input.files[0].name;
+                fileNameDiv.style.fontWeight = 'bold';
+                fileNameDiv.style.color = '#667eea';
+            }
+        }
+    </script>
+</body>
+</html>
